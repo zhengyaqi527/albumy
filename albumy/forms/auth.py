@@ -22,3 +22,22 @@ class RegisterForm(FlaskForm):
     def validate_username(self, field):
         if User.query.filter_by(username=field.data).first():
             raise ValidationError('The username is already in use.')
+
+
+class LoginForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Length(1, 254), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    remember_me = BooleanField('Remember Me')
+    submit = SubmitField()
+
+
+class ForgetPasswordForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Length(1, 254), Email()])
+    submit = SubmitField()
+
+
+class ResetPasswordForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Length(1, 254), Email()])
+    password = PasswordField('Password', validators=[DataRequired(), Length(8, 128), EqualTo('password2')])
+    password2 = PasswordField('Confirm password', validators=[DateTimeField()])
+    submit = SubmitField()
