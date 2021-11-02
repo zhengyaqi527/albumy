@@ -15,7 +15,7 @@ class BaseConfig:
     ALBUMY_ADMIN_EMAIL = os.environ.get('ALBUMY_ADMIN', 'yaqi.zheng@guokr.com')
     ALBUMY_MAIL_SUBJECT_PREFIX = '[Albumy]'
 
-    SECRET_KEY = os.envrion.get('SECRET_KEY')
+    SECRET_KEY = os.environ.get('SECRET_KEY')
 
     MAIL_SERVER = os.environ.get('MAIL_SERVER')
     MAIL_PORT = 465

@@ -9,8 +9,8 @@ from albumy.extensions import db
 
 roles_permissions = db.Table(
     'roles_permissions',
-    db.column('role_id', db.Integer, db.ForeignKey('role.id')),
-    db.Column('permission_id', db.Integet, db.ForeignKey('permission.id'))
+    db.Column('role_id', db.Integer, db.ForeignKey('role.id')),
+    db.Column('permission_id', db.Integer, db.ForeignKey('permission.id'))
 )
 
 
