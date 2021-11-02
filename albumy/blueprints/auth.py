@@ -9,7 +9,7 @@ from albumy.settings import Operations
 from albumy.emails import send_confirm_email, send_reset_password_email
 
 
-auth_bp = Blueprint('auth')
+auth_bp = Blueprint('auth', __name__)
 
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
@@ -59,6 +59,7 @@ def logout():
 
 
 @auth_bp.route('/confirm/<token>')
+@login_required
 def confirm(token):
     if current_user.confirmed:
         return redirect(url_for('main.index'))
@@ -72,6 +73,7 @@ def confirm(token):
     
 
 @auth_bp.route('/resend-confirm-email')
+@login_required
 def resend_confirm_email():
     if current_user.confirmed:
         return redirect(url_for('main.index'))
