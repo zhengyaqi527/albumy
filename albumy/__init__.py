@@ -2,13 +2,14 @@ import os
 
 from flask import Flask, render_template
 
-from .settings import config
-from .extensions import db, bootstrap, mail, login_manager, migrate, moment
-from .blueprints.main import main_bp
-from .blueprints.auth import auth_bp
-from .blueprints.user import user_bp
-from .models import User, Role, Permission
-from .commands import register_commands
+
+from albumy.blueprints.main import main_bp
+from albumy.blueprints.auth import auth_bp
+from albumy.blueprints.user import user_bp
+from albumy.settings import config
+from albumy.extensions import db, bootstrap, mail, login_manager, migrate, moment
+from albumy.models import User, Role, Permission
+from albumy.commands import register_commands
 
 
 
