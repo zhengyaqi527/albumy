@@ -1,7 +1,10 @@
-from flask import current_app
-from itsdangerous.jws import TimedJSONWebSignatureSerialier as Serializer
-from itsdangerous import BadSignature, SignatureExpired
+import os
+import random
 
+from PIL import Image
+from flask import current_app
+from itsdangerous.jws import TimedJSONWebSignatureSerializer as Serializer
+from itsdangerous import BadSignature, SignatureExpired
 
 from albumy.extensions import db
 from albumy.settings import Operations
@@ -39,3 +42,16 @@ def validate_token(user, token, operation, new_password=None):
     return True
 
 
+def resize_image(image, filename, base_width):
+    filename, ext = os.path.splitext(filename)
+    img = Image.open(image)
+    if img.size[0] <= base_width:
+        return filename + ext
+    w_percent = (base_width / float(img.size[0]))
+    h_size = int(float(img.size[1]) * float(w_percent))
+    img = img.resize((base_width, h_size), Image.ANTIALIAS)
+
+    filename += current_app.config['ALBUMY_PHOTO_SUFFIX'][base_width] + ext
+    img.save(os.path.join(current_app.config['ALBUMY_UPLOAD_PATH'], filename))
+    return filename
+    

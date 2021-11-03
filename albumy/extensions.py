@@ -4,6 +4,7 @@ from flask_mail import Mail
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, AnonymousUserMixin
 from flask_moment import Moment
+from flask_dropzone import Dropzone
 
 
 db = SQLAlchemy()
@@ -12,6 +13,7 @@ mail = Mail()
 bootstrap = Bootstrap()
 login_manager = LoginManager()
 moment = Moment()
+dropzone = Dropzone()
 
 
 @login_manager.user_loader

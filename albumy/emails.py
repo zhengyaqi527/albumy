@@ -13,6 +13,11 @@ def _send_async_mail(app, message):
 
 
 def send_mail(to, subject, template, **kwargs):
+    """
+    _get_current_object()
+    Return the current object. This is useful if you want the real object behind the proxy at a time for performance reasons or 
+    because you want to pass the object into a different context.
+    """
     message = Message(current_app.config['ALBUMY_MAIL_SUBJECT_PREFIX'] + subject, recipients=[to])
     message.body = render_template(template + '.txt', **kwargs)
     message.html = render_template(template + '.html', **kwargs)

@@ -1,6 +1,7 @@
 import os
 from threading import BoundedSemaphore
 
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Operations:
     CONFIRM = 'confirm'
@@ -11,12 +12,15 @@ class Operations:
 class BaseConfig:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SECRET_KEY = os.environ.get('SECRET_KEY')
 
+    MAX_CONTENT_LENGTH = 3 * 1024 * 1024
+
+    # 邮件发送
     ALBUMY_ADMIN_EMAIL = os.environ.get('ALBUMY_ADMIN', 'yaqi.zheng@guokr.com')
     ALBUMY_MAIL_SUBJECT_PREFIX = '[Albumy]'
 
-    SECRET_KEY = os.environ.get('SECRET_KEY')
-
+    # 邮件服务器配置
     MAIL_SERVER = os.environ.get('MAIL_SERVER')
     MAIL_PORT = 465
     MAIL_USE_SSL = True
@@ -24,6 +28,20 @@ class BaseConfig:
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get('Albumy Admin', MAIL_USERNAME)
 
+    # 图片上传设置
+    DROPZONE_MAX_FILE_SIZE = 3
+    DROPZONE_MAX_FILES = 30
+    DROPZONE_ALLOWED_FILE_TYPE = 'image'
+
+    # 图片上传
+    ALBUMY_UPLOAD_PATH = os.path.join(basedir, 'uploads')
+    ALBUMY_PHOTO_SIZE = {'small': 400, 'medium': 800}
+    ALBUMY_PHOTO_SUFFIX = {
+        ALBUMY_PHOTO_SIZE['small']: '_s', 
+        ALBUMY_PHOTO_SIZE['medium']: '_m'
+    }
+
+    
 
 class DevelopmentConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')

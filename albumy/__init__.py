@@ -2,15 +2,13 @@ import os
 
 from flask import Flask, render_template
 
-
 from albumy.blueprints.main import main_bp
 from albumy.blueprints.auth import auth_bp
 from albumy.blueprints.user import user_bp
 from albumy.settings import config
-from albumy.extensions import db, bootstrap, mail, login_manager, migrate, moment
+from albumy.extensions import db, bootstrap, mail, login_manager, migrate, moment, dropzone
 from albumy.models import User, Role, Permission
 from albumy.commands import register_commands
-
 
 
 def create_app(config_name=None):
@@ -39,6 +37,7 @@ def register_extensions(app):
     mail.init_app(app)
     login_manager.init_app(app)
     moment.init_app(app)
+    dropzone.init_app(app)
 
 
 def register_blueprints(app):
