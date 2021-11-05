@@ -6,7 +6,7 @@ from albumy.blueprints.main import main_bp
 from albumy.blueprints.auth import auth_bp
 from albumy.blueprints.user import user_bp
 from albumy.settings import config
-from albumy.extensions import db, bootstrap, mail, login_manager, migrate, moment, dropzone
+from albumy.extensions import db, bootstrap, mail, login_manager, migrate, moment, dropzone, avatars
 from albumy.models import User, Role, Permission
 from albumy.commands import register_commands
 
@@ -38,6 +38,7 @@ def register_extensions(app):
     login_manager.init_app(app)
     moment.init_app(app)
     dropzone.init_app(app)
+    avatars.init_app(app)
 
 
 def register_blueprints(app):

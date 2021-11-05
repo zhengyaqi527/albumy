@@ -5,6 +5,7 @@ from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, AnonymousUserMixin
 from flask_moment import Moment
 from flask_dropzone import Dropzone
+from flask_avatars import Avatars
 
 
 db = SQLAlchemy()
@@ -14,7 +15,7 @@ bootstrap = Bootstrap()
 login_manager = LoginManager()
 moment = Moment()
 dropzone = Dropzone()
-
+avatars = Avatars()
 
 @login_manager.user_loader
 def load_user(user_id):

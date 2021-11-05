@@ -1,7 +1,7 @@
 import os
 from threading import BoundedSemaphore
 
-basedir = os.path.abspath(os.path.dirname(__file__))
+basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 class Operations:
     CONFIRM = 'confirm'
@@ -41,6 +41,9 @@ class BaseConfig:
         ALBUMY_PHOTO_SIZE['medium']: '_m'
     }
 
+    # 头像设置
+    AVATARS_SAVE_PATH = os.path.join(ALBUMY_UPLOAD_PATH, 'avatars')
+    AVATARS_SIZE_TUPLE = (30, 100, 200)
     
 
 class DevelopmentConfig(BaseConfig):

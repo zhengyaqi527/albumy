@@ -1,7 +1,9 @@
 from datetime import datetime
+from re import S
 
 from flask import current_app
 from flask_login import UserMixin
+from flask_avatars import Identicon
 from werkzeug.security import generate_password_hash ,check_password_hash
 
 from albumy.extensions import db
@@ -60,26 +62,26 @@ class User(db.Model, UserMixin):
     location = db.Column(db.String(50))
     member_since = db.Column(db.DateTime, default=datetime.utcnow)
     confirmed = db.Column(db.Boolean, default=False)
+    avatars_s = db.Column(db.String(64))
+    avatars_m = db.Column(db.String(64))
+    avatars_l = db.Column(db.String(64))
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
     role = db.relationship('Role', back_populates='users')
     photos = db.relationship('Photo', back_populates='author', cascade='all')
 
-    
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         self.set_role()
-
+        self.generate_avatar()
 
     @property
     def is_admin(self):
         return self.role.name == 'Administrator'
 
-
     def can(self, permission_name):
         permission = Permission.query.filter_by(name=permission_name).first()
         return  permission is not None and self.role is not None and permission in self.role.permissions
 
-    
     def set_role(self):
         if self.role is None:
             if self.email == current_app.config['ALBUMY_ADMIN_EMAIL']:
@@ -87,13 +89,20 @@ class User(db.Model, UserMixin):
             else:
                 self.role = Role.query.filter_by(name='User').first()
             db.session.commit()
-
     
     def set_password(self, password):
         self.pasword_hash = generate_password_hash(password)
 
     def validate_password(self, password):
         return check_password_hash(self.pasword_hash, password)
+
+    def generate_avatar(self):
+        avatar = Identicon()
+        filenames = avatar.generate(text=self.username)
+        self.avatars_s = filenames[0]
+        self.avatars_m = filenames[1]
+        self.avatars_l = filenames[2]
+        db.session.commit()
 
     
 

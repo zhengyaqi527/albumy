@@ -23,7 +23,7 @@ def explore():
     return render_template('main/explore.html')
 
 
-@main_bp.route('/ipload', methods=['GET', 'POST'])
+@main_bp.route('/upload', methods=['GET', 'POST'])
 @login_required
 @confirm_required
 @permission_requeired('UPLOAD')
