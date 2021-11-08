@@ -1,5 +1,4 @@
 from datetime import datetime
-from re import S
 
 from flask import current_app
 from flask_login import UserMixin
