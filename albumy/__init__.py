@@ -79,4 +79,4 @@ def register_errorhandlers(app):
         return render_template('errors/500.html'), 500
 
 def register_commands(app):
-    pass
+    register_commands(app)
