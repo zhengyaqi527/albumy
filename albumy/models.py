@@ -64,9 +64,12 @@ class User(db.Model, UserMixin):
     avatars_s = db.Column(db.String(64))
     avatars_m = db.Column(db.String(64))
     avatars_l = db.Column(db.String(64))
+
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
+
     role = db.relationship('Role', back_populates='users')
     photos = db.relationship('Photo', back_populates='author', cascade='all')
+
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -113,4 +116,5 @@ class Photo(db.Model):
     filename_m = db.Column(db.String(64))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
     author = db.relationship('User', back_populates='photos')

@@ -17,6 +17,7 @@ moment = Moment()
 dropzone = Dropzone()
 avatars = Avatars()
 
+
 @login_manager.user_loader
 def load_user(user_id):
     from albumy.models import User
@@ -28,7 +29,6 @@ login_manager.login_message_category = 'warning'
 
 
 class Guest(AnonymousUserMixin):
-    
     def can(self, permission_name):
         return False
 
