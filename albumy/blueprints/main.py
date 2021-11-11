@@ -38,7 +38,7 @@ def upload():
         filename = random_filename(f.filename) # 生成随机文件名
         f.save(os.path.join(current_app.config['ALBUMY_UPLOAD_PATH'], filename)) # 保存文件对象
         filename_s = resize_image(f, filename, current_app.config['ALBUMY_PHOTO_SIZE']['small'])
-        filename_m = resize_image(f, filename, current_app.config['ALBUMY_PHOTO_SIZE']['media'])
+        filename_m = resize_image(f, filename, current_app.config['ALBUMY_PHOTO_SIZE']['medium'])
         photo = Photo(
             filename=filename,
             filename_s=filename_s,

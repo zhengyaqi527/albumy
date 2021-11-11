@@ -8,7 +8,7 @@ from albumy.blueprints.user import user_bp
 from albumy.settings import config
 from albumy.extensions import db, bootstrap, mail, login_manager, migrate, moment, dropzone, avatars
 from albumy.models import User, Role, Permission
-from albumy.commands import register_commands
+from albumy.commands import cli_commands
 
 
 def create_app(config_name=None):
@@ -79,4 +79,4 @@ def register_errorhandlers(app):
         return render_template('errors/500.html'), 500
 
 def register_commands(app):
-    register_commands(app)
+    cli_commands(app)

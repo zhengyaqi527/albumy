@@ -4,7 +4,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 from albumy.extensions import db
 from albumy.models import User
 from albumy.forms.auth import ForgetPasswordForm, RegisterForm, LoginForm, ResetPasswordForm
-from albumy.utils import validate_token, generate_token
+from albumy.utils import validate_token, generate_token, redirect_back
 from albumy.settings import Operations
 from albumy.emails import send_confirm_email, send_reset_password_email
 
@@ -16,6 +16,7 @@ auth_bp = Blueprint('auth', __name__)
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
+
     form = RegisterForm()
     if form.validate_on_submit():
         name = form.name.data
@@ -40,13 +41,15 @@ def register():
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
+
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data.lower()).first()
         if user is not None and user.validate_password(form.password.data):
             login_user(user, form.remember_me.data)
             flash('Login success.', 'success')
-            return redirect(url_for('main.index'))
+            return redirect_back()
+        flash('Invalid email or password.', 'warning')
     return render_template('auth/login.html', form=form)
 
 

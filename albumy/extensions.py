@@ -22,6 +22,7 @@ avatars = Avatars()
 def load_user(user_id):
     from albumy.models import User
     user = User.query.get(int(user_id))
+    return user
 
 
 login_manager.login_view = 'auth.login'

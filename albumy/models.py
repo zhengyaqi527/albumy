@@ -15,6 +15,12 @@ roles_permissions = db.Table(
 )
 
 
+class Permission(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(30), unique=True)
+    roles = db.relationship('Role', secondary=roles_permissions, back_populates='permissions')
+
+
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), unique=True)
@@ -36,18 +42,12 @@ class Role(db.Model):
                 db.session.add(role)
             role.permissions = []
             for permission_name in roles_permissions_map[role_name]:
-                permission = Permission.query.filter_by(name=permission_name)
+                permission = Permission.query.filter_by(name=permission_name).first()
                 if not permission:
                     permission = Permission(name=permission_name)
                     db.session.add(permission)
                 role.permissions.append(permission)
         db.session.commit()
-
-
-class Permission(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(30), unique=True)
-    roles = db.relationship('Role', secondary=roles_permissions, back_populates='permissions')
 
 
 class User(db.Model, UserMixin):
