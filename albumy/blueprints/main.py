@@ -28,6 +28,11 @@ def get_avatar(filename):
     return send_from_directory(current_app.config['AVATARS_SAVE_PATH'], filename)
 
 
+@main_bp.route('/uploads/<path:filename>')
+def get_image(filename):
+    return send_from_directory(current_app.config['ALBUMY_UPLOAD_PATH'], filename)
+
+
 @main_bp.route('/upload', methods=['GET', 'POST'])
 @login_required
 @confirm_required
