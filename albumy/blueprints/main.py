@@ -54,3 +54,8 @@ def upload():
         db.session.commit()
     
     return render_template('main/upload.html')
+
+
+@main_bp.route('/photo/<int:photo_id>')
+def show_photo(photo_id):
+    pass
