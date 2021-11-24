@@ -5,7 +5,7 @@ import re
 from urllib.parse import urlparse, urljoin
 from PIL import Image
 from faker import Faker
-from flask import current_app, request
+from flask import current_app, request, redirect, url_for, flash
 from sqlalchemy.exc import IntegrityError
 
 from albumy.models import Photo, User
@@ -64,9 +64,3 @@ def fake_photo(count=30):
         )
         db.session.add(photo)
     db.session.commit()
-
-
-def is_safe_url(target):
-    ref_url = urlparse(request.host_url)
-    test_url = urlparse(urljoin(request.host_url, target))
-    return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc

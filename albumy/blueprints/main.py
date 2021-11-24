@@ -1,8 +1,10 @@
 import os
 
-from flask import Blueprint, render_template, request, current_app, send_from_directory
+from flask import Blueprint, render_template, request, current_app, send_from_directory, flash
+from flask.helpers import url_for
 from flask_dropzone import random_filename
 from flask_login import login_required, current_user
+from werkzeug.utils import redirect
 
 from albumy.extensions import db
 from albumy.decorators import permission_requeired, confirm_required
@@ -58,4 +60,25 @@ def upload():
 
 @main_bp.route('/photo/<int:photo_id>')
 def show_photo(photo_id):
-    pass
+    photo = Photo.query.get_or_404(photo_id)
+    return render_template('main/photo.html', photo=photo)
+
+
+@main_bp.route('/photo/next/<int:photo_id>')
+def photo_next(photo_id):
+    photo = Photo.query.get_of_404(photo_id)
+    photo_n = Photo.query.query.with_parent(photo.author).filter(Photo.id < photo_id).order_by(Photo.id.desc()).first()
+    if photo_n is None:
+        flash('This is already the last one.', 'info')
+        return redirect(url_for('show_photo', photo_id=photo_id))
+    return redirect(url_for('.show_photo', photo_id=photo_n.id))
+
+
+@main_bp.route('/photo/pre/<int:photo_id>')
+def photo_previous(photo_id):
+    photo = Photo.query.get_of_404(photo_id)
+    photo_p = Photo.query.query.with_parent(photo.author).filter(Photo.id > photo_id).order_by(Photo.id.asc()).first()
+    if photo_p is None:
+        flash('This is already the first one.', 'info')
+        return redirect(url_for('show_photo', photo_id=photo_id))    
+    return redirect(url_for('.show_photo', photo_id=photo_p.id))    
