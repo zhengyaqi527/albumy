@@ -153,6 +153,13 @@ class Comment(db.Model):
     replied = db.relationship('Comment', back_populates='replies', remote_side=[id])
 
 
+# 图片删除事件监听：删除photo时，自动删除文件系统中的图片文件
+'''
+记录删除对应的SQLAlchemy事件为after_delete，这个事件接收的参数为mapper、connection和target，
+我们通过将event.listen_for()装饰器中的named参数设为True来使用**kwargs传递参数。在函数中，我们通过表示
+目标对象的target获取被删除对象的文件名字段，通过ALBUMY_UPLOAD_PATH变量构造文件路径，然后使用os.remove()
+函数删除对应的文件。
+'''
 @db.event.listens_for(Photo, 'after_delete', named=True)
 def delete_photo(**kwargs):
     target = kwargs['target']

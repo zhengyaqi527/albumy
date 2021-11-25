@@ -70,7 +70,7 @@ def redirect_back(default='main.index', **kwargs):
             return redirect(target)
     return redirect(url_for(default, **kwargs))
 
-
+# 使用flash()函数迭代form.errors字典发送错误消息（这个字典包含字段名称与错误消息列表的映射）
 def flash_errors(form):
     for field, errors in form.errors.items():
         for error in errors:

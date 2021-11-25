@@ -30,8 +30,10 @@
     </div>
 </div>
 
+<!-- 照片描述 -->
 <div class="card bg-light mb-3 w-100">
     <div class="card-body">
+        <!--描述文本-->
         <div id="description">
             <p>
                 {% if photo.description %}
@@ -47,11 +49,12 @@
             </p>
         </div>
         {% if current_user == photo.author %}
+            <!--描述表单-->
             <div id="description-form">
                 <form action="{{ url_for('.edit_description', photo_id=photo.id) }}" method="post">
                     {{ description_form.csrf_token }}
                     {{ render_field(description_form.description) }}
-                    <a class="btn btn=light btn-sm" id="cancel-description">Cancel</a>
+                    <a class="btn btn-light btn-sm" id="cancel-description">Cancel</a>
                     {{ render_field(description_form.submit, class='btn btn-success btn-sm') }}
                 </form>
             </div>
