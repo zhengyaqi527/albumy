@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from flask import current_app
@@ -69,6 +70,7 @@ class User(db.Model, UserMixin):
 
     role = db.relationship('Role', back_populates='users')
     photos = db.relationship('Photo', back_populates='author', cascade='all')
+    comments = db.relationship('Comment', back_populates='author', cascade='all')
 
 
     def __init__(self, **kwargs):
@@ -106,7 +108,11 @@ class User(db.Model, UserMixin):
         self.avatars_l = filenames[2]
         db.session.commit()
 
-    
+tagging = db.Table('tagging',
+        db.Column('photo_id', db.Integer, db.ForeignKey('photo.id')),
+        db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'))
+    ) 
+
 
 class Photo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -114,7 +120,43 @@ class Photo(db.Model):
     filename = db.Column(db.String(64))
     filename_s = db.Column(db.String(64))
     filename_m = db.Column(db.String(64))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    can_comment = db.Column(db.Boolean, default=True)
+    flag = db.Column(db.Integer, default=0)
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     author = db.relationship('User', back_populates='photos')
+    comments = db.relationship('Comment', back_populates='photo', cascade='all')
+    tags = db.relationship('Tag', secondary=tagging, back_populates='photos')
+
+
+class Tag(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), unique=True)
+
+    photos = db.relationship('Photo', secondary=tagging, back_populates='tags')
+
+
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    flag = db.Column(db.Integer, default=0)
+
+    replied_id = db.Column(db.Integer, db.ForeignKey('comment.id'))
+    author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    photo_id = db.Column(db.Integer, db.ForeignKey('photo.id'))
+
+    photo = db.relationship('Photo', back_populates='comments')
+    author = db.relationship('User', back_populates='comments')
+    replies = db.relationship('Comment', back_populates='replied', cascade='all')
+    replied = db.relationship('Comment', back_populates='replies', remote_side=[id])
+
+
+@db.event.listens_for(Photo, 'after_delete', named=True)
+def delete_photo(**kwargs):
+    target = kwargs['target']
+    for filename in [target.filename, target.filename_s, target.filename_m]:
+        path = os.path.join(current_app.config['ALBUMY_UPLOAD_PATH', filename])
+        if os.path.exists(path):
+            os.remove(path)
