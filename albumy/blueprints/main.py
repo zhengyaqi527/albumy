@@ -133,6 +133,80 @@ def edit_description(photo_id):
     return redirect(url_for('.show_photo', photo_id=photo_id))
 
 
+@main_bp.route('/photo/<int:photo_id>/comment/new', methods=['POST'])
+@login_required
+@permission_requeired('COMMENT')
+def new_comment(photo_id):
+    photo = Photo.query.get_or_404(photo_id)
+    page = request.args.get('page', 1, type=int)
+    form = CommentForm()
+    if form.validate_on_submit():
+        body = form.body.data
+        author = current_user._get_current_object()
+        comment = Comment(
+            body=body,
+            author=author,
+            photo=photo
+        )
+
+        replied_id = request.args.get('reply')
+        if replied_id:
+            comment.replied = Comment.query.get_or_404(replied_id)
+        db.session.add(comment)
+        db.session.commit()
+        flash('Comment phblished.', 'success')
+    
+    flash_errors(form)
+    return redirect(url_for('.show_photo', photo_id=photo_id, page=page))
+
+
+@main_bp.route('/report/comment/<int:comment_id>', methods=['POST'])
+@login_required
+@confirm_required
+def report_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+    comment.flag += 1
+    db.session.commit()
+    flash('Comment reported.', 'success')
+    return redirect(url_for('.show_photo', photo_id=comment.photo_id))
+
+
+@main_bp.route('/set-comment/<int:photo_id>', methods=['POST'])
+@login_required
+def set_comment(photo_id):
+    photo = Photo.query.get_or_404(photo_id)
+    if current_user != photo.author:
+        abort(403)
+    if photo.can_comment:
+        photo.can_comment = False
+        flash('Comment disabled.', 'info')
+    else:
+        photo.can_comment = True
+        flash('Comment enabled.', 'info')
+    db.session.commit()
+    return redirect(url_for('.show_photo', photo_id=photo_id))
+
+
+@main_bp.route('/reply/comment/<int:comment_id>')
+@login_required
+@permission_requeired('COMMENT')
+def reply_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+    return redirect(url_for('.show_photo', photo_id=comment.photo_id, reply=comment_id, author=comment.author.name) + '#comment-form')
+
+
+@main_bp.route('/delete/comment/<int:comment_id>', methods=['POST'])
+@login_required
+def delete_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+    if current_user != comment.author and current_user != comment.photo.author:
+        abort(403)
+    db.session.delete(comment)
+    db.session.commit()
+    flash('Comment deleted.', 'info')
+    return redirect(url_for('.show_photo', photo_id=comment.photo_id))
+
+
 @main_bp.route('/photo/<int:photo_id>/tag/new', methods=['POST'])
 def new_tag(photo_id):
     photo = Photo.query.get_or_404(photo_id)
