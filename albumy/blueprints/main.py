@@ -1,3 +1,4 @@
+from logging import log
 import os
 
 from flask import Blueprint, render_template, request, current_app, send_from_directory, flash, abort
@@ -8,7 +9,7 @@ from werkzeug.utils import redirect
 
 from albumy.extensions import db
 from albumy.decorators import permission_requeired, confirm_required
-from albumy.models import Photo, Tag, Comment
+from albumy.models import Photo, Tag, Comment, Collect
 from albumy.utils import flash_errors, resize_image
 from albumy.forms.main import DescriptionForm, TagForm, CommentForm
 
@@ -35,7 +36,7 @@ def get_avatar(filename):
 def get_image(filename):
     return send_from_directory(current_app.config['ALBUMY_UPLOAD_PATH'], filename)
 
-
+# 上传图片
 @main_bp.route('/upload', methods=['GET', 'POST'])
 @login_required
 @confirm_required
@@ -59,6 +60,7 @@ def upload():
     return render_template('main/upload.html')
 
 
+# 图片：展示图片、上一张图片、下一张图片、删除图片、举报图片、修改图片描述
 @main_bp.route('/photo/<int:photo_id>')
 def show_photo(photo_id):
     photo = Photo.query.get_or_404(photo_id)
@@ -133,6 +135,23 @@ def edit_description(photo_id):
     return redirect(url_for('.show_photo', photo_id=photo_id))
 
 
+# 图片评论：设置图片是否可评论、新增评论、回复评论、删除评论、举报评论
+@main_bp.route('/set-comment/<int:photo_id>', methods=['POST'])
+@login_required
+def set_comment(photo_id):
+    photo = Photo.query.get_or_404(photo_id)
+    if current_user != photo.author:
+        abort(403)
+    if photo.can_comment:
+        photo.can_comment = False
+        flash('Comment disabled.', 'info')
+    else:
+        photo.can_comment = True
+        flash('Comment enabled.', 'info')
+    db.session.commit()
+    return redirect(url_for('.show_photo', photo_id=photo_id))
+
+
 @main_bp.route('/photo/<int:photo_id>/comment/new', methods=['POST'])
 @login_required
 @permission_requeired('COMMENT')
@@ -148,7 +167,6 @@ def new_comment(photo_id):
             author=author,
             photo=photo
         )
-
         replied_id = request.args.get('reply')
         if replied_id:
             comment.replied = Comment.query.get_or_404(replied_id)
@@ -158,33 +176,6 @@ def new_comment(photo_id):
     
     flash_errors(form)
     return redirect(url_for('.show_photo', photo_id=photo_id, page=page))
-
-
-@main_bp.route('/report/comment/<int:comment_id>', methods=['POST'])
-@login_required
-@confirm_required
-def report_comment(comment_id):
-    comment = Comment.query.get_or_404(comment_id)
-    comment.flag += 1
-    db.session.commit()
-    flash('Comment reported.', 'success')
-    return redirect(url_for('.show_photo', photo_id=comment.photo_id))
-
-
-@main_bp.route('/set-comment/<int:photo_id>', methods=['POST'])
-@login_required
-def set_comment(photo_id):
-    photo = Photo.query.get_or_404(photo_id)
-    if current_user != photo.author:
-        abort(403)
-    if photo.can_comment:
-        photo.can_comment = False
-        flash('Comment disabled.', 'info')
-    else:
-        photo.can_comment = True
-        flash('Comment enabled.', 'info')
-    db.session.commit()
-    return redirect(url_for('.show_photo', photo_id=photo_id))
 
 
 @main_bp.route('/reply/comment/<int:comment_id>')
@@ -207,6 +198,18 @@ def delete_comment(comment_id):
     return redirect(url_for('.show_photo', photo_id=comment.photo_id))
 
 
+@main_bp.route('/report/comment/<int:comment_id>', methods=['POST'])
+@login_required
+@confirm_required
+def report_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+    comment.flag += 1
+    db.session.commit()
+    flash('Comment reported.', 'success')
+    return redirect(url_for('.show_photo', photo_id=comment.photo_id))
+
+
+# 标签：展示标签、新建标签、删除标签
 @main_bp.route('/photo/<int:photo_id>/tag/new', methods=['POST'])
 def new_tag(photo_id):
     photo = Photo.query.get_or_404(photo_id)
@@ -264,3 +267,40 @@ def show_tag(tag_id, order):
         order_rule = 'collects'
     
     return render_template('main/tag.html', tag=tag, photos=photos, pagination=pagination, order_rule=order_rule)
+
+
+# 收藏：新增收藏、取消收藏、
+@main_bp.route('/collect/<int:photo_id>', methods=['POST'])
+@login_required
+@confirm_required
+@permission_requeired('COLLECT')
+def collect(photo_id):
+    photo = Photo.query.get_or_404(photo_id)
+    if current_user.is_collecting(photo):
+        flash('Already collected.', 'info')
+        return redirect(url_for('.show_photo', photo_id=photo_id))
+    current_user.collect(photo)
+    flash('Photo collected.', 'info')
+    return redirect(url_for('.show_photo', photo_id=photo_id))
+
+
+@main_bp.route('/uncollect/<int:photo_id>', methods=['POST'])
+@login_required
+def uncollect(photo_id):
+    photo = Photo.query.get_or_404(photo_id)
+    if not current_user.is_collecting(photo):
+        flash('Not collect yet.', 'info')
+        return redirect(url_for('.show_photo', photo_id=photo_id))
+    current_user.uncollect(photo)
+    flash('Photo uncollected.', 'info')
+    return redirect(url_for('.show_photo', photo_id=photo_id))
+
+
+@main_bp.route('/photo/<int:photo_id>/collectors')
+def show_collectors(photo_id):
+    photo = Photo.query.get_or_404(photo_id)
+    page = request.args.get('page', 1, type=int)
+    per_page = current_app.config['ALBUMY_USER_PER_PAGE']
+    pagination = Collect.query.with_parent(photo).order_by(Collect.timestamp.asc()).paginate(page, per_page, error_out=False)
+    collects = pagination.items
+    return render_template('main/collectors.html', collects=collects, pagination=pagination, photo=photo)

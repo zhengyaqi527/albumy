@@ -48,6 +48,9 @@ class BaseConfig:
 
     # 图片展示
     ALBUMY_PHOTO_PER_PAGE = 12
+
+    # 用户展示
+    ALBUMY_USER_PER_PAGE = 12
     
 
 class DevelopmentConfig(BaseConfig):

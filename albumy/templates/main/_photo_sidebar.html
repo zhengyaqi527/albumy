@@ -10,6 +10,7 @@
     </ul>
 </nav>
 
+<!--照片展示-->
 <div class="card bg-light mb-3 w-100 sidebar-card">
     <div class="card-body">
         <div class="row">
@@ -30,7 +31,7 @@
     </div>
 </div>
 
-<!-- 照片描述 -->
+<!-- 照片描述 & 标签 -->
 <div class="card bg-light mb-3 w-100">
     <div class="card-body">
         <!--描述文本-->
@@ -59,8 +60,10 @@
                 </form>
             </div>
         {% endif %}
+        <!--标签-->
         <div id="tags">
             <p>
+                <!--标签展示-->
                 {% if photo.tags %}
                     {% for tag in photo.tags %}
                         <a class="badge badge-light" href="{{ url_for('.show_tag', tag_id=tag.id) }}" target="_blank">
@@ -69,6 +72,7 @@
                         </a>
                     {% endfor %}
                 {% endif %}
+                <!--标签编辑-->
                 {% if current_user == photo.author %}
                         <a id="tag-btn" href="#!">
                             <small>
@@ -80,6 +84,7 @@
             </p>
         </div>
         {% if current_user == photo.author %}
+            <!--标签表单-->
             <div id="tag-form">
                 <form action="{{ url_for('.new_tag', photo_id=photo.id) }}" method="post">
                     {{ tag_form.csrf_token }}
@@ -99,6 +104,43 @@
                     {% endfor %}
                 {% endif %}
             </div>
+        {% endif %}
+        <!--收藏-->
+        {% if current_user.is_authenticated %}
+            {% if current_user.is_collecting(photo) %}
+                <!--取消收藏表单-->
+                <form class="inline" method="post" action="{{ url_for('main.uncollect', photo_id=photo.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                        <span class="oi oi-x"></span>
+                        Uncollect
+                    </button>
+                </form> 
+            {% else %}
+                <!--收藏表单-->
+                <form class="inline" method="post" action="{{ url_for('main.collect', photo_id=photo.id) }}">
+                    <input type="hidden" name="csrf_token" value="csrf_token()">
+                    <button type="submit" class="btn btn-outline-primary btn-sm">
+                        <span class="oi oi-star"></span>
+                        Collect
+                    </button>
+                </form>
+            {% endif %}
+        {% else %}
+                <!--收藏表单-->
+                <form class="inline" method="post" action="{{ url_for('main.collect', photo_id=photo.id) }}">
+                    <input type="hidden" name="csrf_token" value="csrf_token()">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <span class="oi oi-star"></span>
+                        Collect
+                    </button>
+                </form>
+        {% endif %}
+        <!--显示照片收藏人数-->
+        {% if photo.collectors %}
+                <a href="{{ url_for('main.show_collectors', photo_id=photo.id) }}">
+                    {{ photo.collectors | length }}
+                </a>
         {% endif %}
     </div>
 </div>

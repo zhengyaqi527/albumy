@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% from 'bootstrap/pagination.html' import render_pagination %}
+<!--user_card宏中使用了Flask-Login提供的current_user变量，所以我们需要在导入时使用with context指令显式声明包含上下文-->
+{% from 'macros.html' import user_card with context %}
+
+{% block title %}Collectors{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <div class="row">
+            <div class="col-md-12">
+                <a class="btn btn-default btn-sm" href="{{ url_for('main.show_photo', photo_id=photo.id) }}">
+                    <span class="oi oi-arrow-left"></span>
+                    Return
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h3>{{ photo.collectors | length }} Collectors</h3>
+            {% for collect in collects %}
+                {{ user_card(collect.collector) }}
+            {% endfor %}
+        </div>
+    </div>
+    {% if collections %}
+        <div class="page-footer">
+            {{ render_pagination(pagination, align='center') }}
+        </div>
+    {% endif %}
+{% endblock %}
