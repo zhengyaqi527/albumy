@@ -6,6 +6,7 @@ from flask_login import LoginManager, AnonymousUserMixin
 from flask_moment import Moment
 from flask_dropzone import Dropzone
 from flask_avatars import Avatars
+from flask_wtf import CSRFProtect
 
 
 db = SQLAlchemy()
@@ -16,6 +17,7 @@ login_manager = LoginManager()
 moment = Moment()
 dropzone = Dropzone()
 avatars = Avatars()
+csrf = CSRFProtect()
 
 
 @login_manager.user_loader

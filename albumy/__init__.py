@@ -8,7 +8,7 @@ from albumy.blueprints.main import main_bp
 from albumy.blueprints.auth import auth_bp
 from albumy.blueprints.user import user_bp
 from albumy.settings import config
-from albumy.extensions import db, bootstrap, mail, login_manager, migrate, moment, dropzone, avatars
+from albumy.extensions import db, bootstrap, mail, login_manager, migrate, moment, dropzone, avatars, csrf
 from albumy.models import User, Role, Permission
 from albumy.commands import cli_commands
 
@@ -41,6 +41,7 @@ def register_extensions(app):
     moment.init_app(app)
     dropzone.init_app(app)
     avatars.init_app(app)
+    csrf.init_app(app)
 
 
 def register_blueprints(app):
@@ -63,22 +64,27 @@ def register_template_context(app):
 def register_errorhandlers(app):
     @app.errorhandler(400)
     def bad_request(e):
+        print(e)
         return render_template('errors/400.html'), 400
 
     @app.errorhandler(403)
     def forbidden(e):
+        print(e)
         return render_template('errors/403.html'), 403
 
     @app.errorhandler(404)
     def page_not_found(e):
+        print(e)
         return render_template('errors/404.html'), 404
 
     @app.errorhandler(413)
     def request_entity_too_large(e):
+        print(e)
         return render_template('errors/413.html'), 413
 
     @app.errorhandler(500)
     def internal_server_error(e):
+        print(e)
         return render_template('errors/500.html'), 500
 
 def register_commands(app):

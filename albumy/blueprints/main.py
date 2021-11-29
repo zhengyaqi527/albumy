@@ -64,28 +64,42 @@ def upload():
 @main_bp.route('/photo/<int:photo_id>')
 def show_photo(photo_id):
     photo = Photo.query.get_or_404(photo_id)
+    page = request.args.get('page', 1, type=int)
+    per_page = current_app.config['ALBUMY_COMMENT_PER_PAGE']
+    pagination = Comment.query.with_parent(photo).order_by(Comment.timestamp.asc()).paginate(page, per_page, error_out=False)
+    comments = pagination.items
+
+    comment_form = CommentForm()
+    tag_form = TagForm()
     description_form = DescriptionForm()
     description_form.description.data = photo.description
-    return render_template('main/photo.html', photo=photo, description_form=description_form)
+    return render_template('main/photo.html', 
+                                photo=photo,
+                                comments=comments,
+                                pagination=pagination, 
+                                description_form=description_form,
+                                comment_form=comment_form,
+                                tag_form=tag_form
+                        )
 
 
 @main_bp.route('/photo/next/<int:photo_id>')
 def photo_next(photo_id):
-    photo = Photo.query.get_of_404(photo_id)
-    photo_n = Photo.query.query.with_parent(photo.author).filter(Photo.id < photo_id).order_by(Photo.id.desc()).first()
+    photo = Photo.query.get_or_404(photo_id)
+    photo_n = Photo.query.with_parent(photo.author).filter(Photo.id < photo_id).order_by(Photo.id.desc()).first()
     if photo_n is None:
         flash('This is already the last one.', 'info')
-        return redirect(url_for('show_photo', photo_id=photo_id))
+        return redirect(url_for('.show_photo', photo_id=photo_id))
     return redirect(url_for('.show_photo', photo_id=photo_n.id))
 
 
 @main_bp.route('/photo/pre/<int:photo_id>')
 def photo_previous(photo_id):
-    photo = Photo.query.get_of_404(photo_id)
-    photo_p = Photo.query.query.with_parent(photo.author).filter(Photo.id > photo_id).order_by(Photo.id.asc()).first()
+    photo = Photo.query.get_or_404(photo_id)
+    photo_p = Photo.query.with_parent(photo.author).filter(Photo.id > photo_id).order_by(Photo.id.asc()).first()
     if photo_p is None:
         flash('This is already the first one.', 'info')
-        return redirect(url_for('show_photo', photo_id=photo_id))    
+        return redirect(url_for('.show_photo', photo_id=photo_id))    
     return redirect(url_for('.show_photo', photo_id=photo_p.id))    
 
 
@@ -225,7 +239,7 @@ def new_tag(photo_id):
                 db.session.add(tag)
                 db.session.commit()
             if tag not in photo.tags:
-                photo.tags.add(tag)
+                photo.tags.append(tag)
                 db.session.commit()
         flash('Tag added.', 'success')
         flash_errors(form)
@@ -233,7 +247,7 @@ def new_tag(photo_id):
         return redirect(url_for('.show_photo', photo_id=photo_id))
 
 
-@main_bp.route('/delete/tab/<int:photo_id>/<int:tag_id>')
+@main_bp.route('/delete/tag/<int:photo_id>/<int:tag_id>', methods=['POST'])
 def delete_tag(photo_id, tag_id):
     tag = Tag.query.get_or_404(tag_id)
     photo = Photo.query.get_or_404(photo_id)
@@ -275,12 +289,14 @@ def show_tag(tag_id, order):
 @confirm_required
 @permission_requeired('COLLECT')
 def collect(photo_id):
+    print('进入collect()')
     photo = Photo.query.get_or_404(photo_id)
     if current_user.is_collecting(photo):
         flash('Already collected.', 'info')
         return redirect(url_for('.show_photo', photo_id=photo_id))
+
     current_user.collect(photo)
-    flash('Photo collected.', 'info')
+    flash('Photo collected.', 'success')
     return redirect(url_for('.show_photo', photo_id=photo_id))
 
 

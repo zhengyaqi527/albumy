@@ -15,7 +15,7 @@
     <div class="card-body">
         <div class="row">
             <a href="{{ url_for('user.index', username=photo.author.username) }}">
-                <img class="sidebar-avatar rounded avatar-m" src="{{ url_for('main.get_avatar', filename=photo.avatar.avatar_m) }}">
+                <img class="sidebar-avatar rounded avatar-m" src="{{ url_for('main.get_avatar', filename=photo.author.avatar_m) }}">
             </a>
             <div class="sidebar-profile">
                 <h6 class="card-title">
@@ -41,7 +41,7 @@
                     {{ photo.description }}
                 {% endif %}
                 {% if current_user == photo.author %}
-                    <a id="descirption-btn" href="#!">
+                    <a id="description-btn" href="#!">
                         <small class="oi oi-pencil">
                             <span>edit description</span>
                         </small>
@@ -89,13 +89,13 @@
                 <form action="{{ url_for('.new_tag', photo_id=photo.id) }}" method="post">
                     {{ tag_form.csrf_token }}
                     {{ render_field(tag_form.tag) }}
-                    <a class="btn btn-light btn-sm">Cancel</a>
+                    <a class="btn btn-light btn-sm" id="cancel-tag">Cancel</a>
                     {{ render_field(tag_form.submit, class='btn btn-success btn-sm') }}
                 </form>
                 {% if photo.tags %}
                     <hr>
                     {% for tag in photo.tags %}
-                        <a>
+                        <a class="dead-link" href="#!" data-href="{{ url_for('.delete_tag', photo_id=photo.id, tag_id=tag.id) }}" data-toggle="modal" data-target="#confirm-delete" title="Delete tag">
                             <span class="badge badge-danger">
                                 {{ tag.name }}
                                 <span class="oi oi-trash" aria-hidden="true"></span>
@@ -119,7 +119,7 @@
             {% else %}
                 <!--收藏表单-->
                 <form class="inline" method="post" action="{{ url_for('main.collect', photo_id=photo.id) }}">
-                    <input type="hidden" name="csrf_token" value="csrf_token()">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn btn-outline-primary btn-sm">
                         <span class="oi oi-star"></span>
                         Collect
@@ -139,7 +139,7 @@
         <!--显示照片收藏人数-->
         {% if photo.collectors %}
                 <a href="{{ url_for('main.show_collectors', photo_id=photo.id) }}">
-                    {{ photo.collectors | length }}
+                    &nbsp;&nbsp;{{ photo.collectors | length }}
                 </a>
         {% endif %}
     </div>

@@ -54,7 +54,7 @@ class Role(db.Model):
 class Collect(db.Model):
     collector_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
     collected_id = db.Column(db.Integer, db.ForeignKey('photo.id'), primary_key=True)
-    timestamp = db.Column(db.Datetime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     collector = db.relationship('User', back_populates='collections', lazy='joined')
     collected = db.relationship('Photo', back_populates='collectors', lazy='joined')
@@ -71,9 +71,9 @@ class User(db.Model, UserMixin):
     location = db.Column(db.String(50))
     member_since = db.Column(db.DateTime, default=datetime.utcnow)
     confirmed = db.Column(db.Boolean, default=False)
-    avatars_s = db.Column(db.String(64))
-    avatars_m = db.Column(db.String(64))
-    avatars_l = db.Column(db.String(64))
+    avatar_s = db.Column(db.String(64))
+    avatar_m = db.Column(db.String(64))
+    avatar_l = db.Column(db.String(64))
 
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
 
@@ -113,14 +113,15 @@ class User(db.Model, UserMixin):
     def generate_avatar(self):
         avatar = Identicon()
         filenames = avatar.generate(text=self.username)
-        self.avatars_s = filenames[0]
-        self.avatars_m = filenames[1]
-        self.avatars_l = filenames[2]
+        self.avatar_s = filenames[0]
+        self.avatar_m = filenames[1]
+        self.avatar_l = filenames[2]
         db.session.commit()
 
 
     def collect(self, photo):
         if not self.is_collecting(photo):
+            print('正在收藏')
             collect = Collect(collector=self, collected=photo)
             db.session.add(collect)
             db.session.commit()

@@ -1,6 +1,5 @@
 import os
 import random
-import re
 
 from urllib.parse import urlparse, urljoin
 from PIL import Image

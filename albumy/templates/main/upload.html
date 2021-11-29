@@ -23,7 +23,7 @@
 {% endblock %}
 
 {% block scripts %}
-    {{ super }}
+    {{ super() }}
     <script src="{{ url_for('static', filename='js/dropzone.min.js') }}"></script>
     {{ dropzone.config() }}
 {% endblock %}
