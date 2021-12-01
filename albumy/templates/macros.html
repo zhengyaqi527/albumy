@@ -19,5 +19,47 @@
                 {{ user.name }}
             </a>
         </h6>
+        <!--用户卡片显示关注状态-->
+        {{ follow_area(user) }}
     </div>
+{% endmacro %}
+
+{% macro follow_area(user) %}
+    <!--当前用户已经登录，判断当前用户和传入用户是否相同-->
+    {% if current_user.is_authenticated %}
+        <!--当前用户和传入的用户不同，判断当前用户是否已经关注了传入的用户-->
+        {% if user != current_user %}
+            <!--当前用户已经关注了传入的用户，显示取消关注入口-->
+            {% if current_user.is_following(user) %}
+                <form class="inline" method="post" action="{{ url_for('user.unfollow', username=user.username, next=request.full_path) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-drak btn-sm">
+                        Unfollow
+                    </button>
+                    {% if current_user.is_following_by(user) %}
+                        <p class="badge badge-light">Follow each other</p>
+                    {% endif %}
+                </form>
+            {% else %}
+            <!--当前用户未关注传入的用户，显示关注入口-->
+                <form class="inline" method="post" action="{{ url_for('user.follow', username=user.username, next=request.full_path) }}">
+                    <input type="hidden" name="csrf_token" value="csrf_token()">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        Follow
+                    </button>
+                    {% if current_user.is_followed_by(user) %}
+                        <p class="badge badge-light">Follows you</p>
+                    {% endif %}
+                </form>            
+            {% endif %}        
+        {% endif %}
+    {% else %}
+        <!--未登录用户一直显示关注入口-->
+        <form class="inline" method="post" action="{{ url_for('user.follow', username=user.username) }}">
+            <input type="hidden" name="csrf_token" value="csrf_token()">
+            <button type="submit" class="btn btn-primary btn-sm"> 
+                Follow
+            </button>
+        </form>
+    {% endif %}
 {% endmacro %}
