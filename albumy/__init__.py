@@ -1,7 +1,6 @@
 import os
 
 from flask import Flask, render_template
-from flask.helpers import url_for
 
 from albumy.blueprints.ajax import ajax_bp
 from albumy.blueprints.main import main_bp
@@ -9,7 +8,7 @@ from albumy.blueprints.auth import auth_bp
 from albumy.blueprints.user import user_bp
 from albumy.settings import config
 from albumy.extensions import db, bootstrap, mail, login_manager, migrate, moment, dropzone, avatars, csrf
-from albumy.models import User, Role, Permission
+from albumy.models import Collect, Comment, Follow, Photo, User, Role, Permission, Tag
 from albumy.commands import cli_commands
 
 
@@ -54,7 +53,16 @@ def register_blueprints(app):
 def register_shell_context(app):
     @app.shell_context_processor
     def make_shell_context():
-        return dict(db=db, User=User, Role=Role, Permission=Permission)
+        return dict(db=db, 
+                    User=User, 
+                    Role=Role, 
+                    Permission=Permission, 
+                    Follow=Follow, 
+                    Collect=Collect, 
+                    Photo=Photo, 
+                    Tag=Tag, 
+                    Comment=Comment
+                )
 
 
 def register_template_context(app):

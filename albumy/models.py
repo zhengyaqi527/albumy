@@ -174,7 +174,8 @@ class User(db.Model, UserMixin):
     def is_followed_by(self, user):
         return self.followers.filter_by(follower_id=user.id).first() is not None
 
-    def follow_self_all(self):
+    @classmethod
+    def follow_self_all(cls):
         for user in User.query.all():
             user.follow(user)
 

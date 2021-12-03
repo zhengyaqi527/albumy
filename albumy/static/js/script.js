@@ -1,7 +1,12 @@
 $(function () {
 
     var default_error_message = 'Server error, please try again later.';
-
+    
+    /*
+    和普通请求类似，对于会修改数据的AJAX请求，我们需要设置正确的HTTP方法，并设置CSRF令牌。因为不再定义表单，所以没法使用
+    旧的方式添加一个令牌隐藏字段。我们可以通过jQuery的ajaxSetup()方法设置AJAX，在AJAX请求的首部添加一个X-CSRFToken字段，
+    其值为CSRF令牌值，令牌值仍然通过CSRFProtect扩展提供的csrf_token()函数获取
+    */
     $.ajaxSetup({
         beforeSend: function (xhr, settings) {
             if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
@@ -74,9 +79,6 @@ $(function () {
                             $el.popover('hide');
                         }, 200);
                     });
-                },
-                error: function (error) {
-                    toast('Server error, please try again later.');
                 }
             });
         }, 500);

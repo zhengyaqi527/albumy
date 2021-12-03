@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, jsonify, current_user
+from flask import Blueprint, render_template, jsonify
+from  flask_login import current_user
 
 from albumy.models import User
 
