@@ -2,14 +2,60 @@
     <img class="rounded img-fluid avatar-s popup-avatar" src="{{ url_for('mian.get_avatar', filename=user.avatar_m) }}">
     <div class="popup-profile">
         <h6>{{ user.name }}</h6>
-        <p class="text-muted">{{ user.username }}</p>
+        <p class="text-muted">
+            {{ user.username }}
+            {% if current_user.is_authenticated %}
+                <!--根据当前用户与user之间的关注状态，显示关注状态标记-->
+                {% if current_user != user and current_user.is_followed_by(user) %}
+                    {% if user.is_followed_by(current_user) %}
+                        <span class="badge badge-light">Follow each other</span>
+                    {% else %}
+                        <span class="badge badge-light">Follows you</span>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        </p>
     </div>
     <p class="card-text">
+        <!--显示用户的照片数量-->
         <a href="{{ url_for('user.index', username=user.username) }}">
             <strong>{{ user.photos | length }}</strong> Photos
-        </a>&nbsp;
+        </a>
+        &nbsp;
+        <!--显示用户的关注者数量（需要减去本身）-->
+        <a href="{{ url_for('user.show_followers', username=user.username) }}">
+            <strong id="followers-count-{{ user.id }}" data-href="{{ url_for('ajax.followers_count', user_id=user.id) }}">
+                {{ user.followers.count() - 1 }}
+            </strong>
+            Followers
+        </a>
     </p>
     <a href="{{ url_for('user.index', username=user.username) }}" class="btn btn-light btn-sm">
         Homepage
     </a>
+    {% if current_user.is_authenticated %}
+        <!--用户已经登录，判断用户和传入user的关注状态-->
+        {% if user != current_user %}
+            <!--current_user关注了user，显示Unfollow-->
+            <button data-id="{{ user.id }}"
+                    data-href="{{ url_for('ajax.unfollow', username=user.username) }}"
+                    class="{% if not current_user.is_following(user) %}hide{% endif %} btn btn-dark btn-sm unfollow-btn">
+                Unfollow
+            </button>
+            <!--current_user未关注user，显示Follow-->
+            <button data-id="{{ user.id }}"
+                    data-href="{{ url_for('ajax.follow', username=user.username) }}"
+                    class="{% if current_user.is_following(user) %}hide{% endif %} btn btn-primary btn-sm follow-btn">
+                Follow
+            </button>
+        {% endif %}
+    <!--用户未登录，一直显示Follow-->
+    {% else %}
+        <form class="inline" method="post" action="{{ url_for('user.follow', username=user.username) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-primary btn-sm">
+                Follow
+            </button>
+        </form>
+    {% endif %}
 </div>

@@ -6,9 +6,11 @@
 
 {% block content %}
     <div class="row">
-        <div class="col-md-12">
+        <div class="row-col-12">
+            <!--判断follows的数量是否为1，为1的话说明关注者为用户本身，不需要显示关注用户列表-->
             {% if follows | length != 1 %}
                 {% for follow in follows %}
+                    <!--判断关注者是不是用户本身，不是的话渲染关注者用户卡片-->
                     {% if follow.follower != user %}
                         {{ user_card(user=follow.follower) }}
                     {% endif %}
