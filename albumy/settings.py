@@ -58,6 +58,9 @@ class BaseConfig:
 
     # 用户展示
     ALBUMY_USER_PER_PAGE = 12
+
+    # 通知消息展示
+    ALBUMY_NOTIFICATION_PER_PAGE = 12
     
 
 class DevelopmentConfig(BaseConfig):

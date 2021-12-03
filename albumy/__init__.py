@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask, render_template
+from flask_login import current_user
 
 from albumy.blueprints.ajax import ajax_bp
 from albumy.blueprints.main import main_bp
@@ -8,7 +9,7 @@ from albumy.blueprints.auth import auth_bp
 from albumy.blueprints.user import user_bp
 from albumy.settings import config
 from albumy.extensions import db, bootstrap, mail, login_manager, migrate, moment, dropzone, avatars, csrf
-from albumy.models import Collect, Comment, Follow, Photo, User, Role, Permission, Tag
+from albumy.models import Collect, Comment, Follow, Notification, Photo, User, Role, Permission, Tag
 from albumy.commands import cli_commands
 
 
@@ -66,7 +67,14 @@ def register_shell_context(app):
 
 
 def register_template_context(app):
-    pass
+    @app.context_processor
+    def make_template_context():
+        if current_user.is_authenticated:
+            notification_count = Notification.query.with_parent(current_user).filter_by(is_read=False).count()
+        else:
+            notification_count = None
+            
+        return dict(notification_count=notification_count)
 
 
 def register_errorhandlers(app):

@@ -5,13 +5,16 @@ from flask import Blueprint, render_template, request, current_app, send_from_di
 from flask.helpers import url_for
 from flask_dropzone import random_filename
 from flask_login import login_required, current_user
+from sqlalchemy.engine import url
 from werkzeug.utils import redirect
+from albumy import notifications
 
 from albumy.extensions import db
 from albumy.decorators import permission_requeired, confirm_required
-from albumy.models import Photo, Tag, Comment, Collect
+from albumy.models import Photo, Tag, Comment, Collect, Notification
 from albumy.utils import flash_errors, resize_image
 from albumy.forms.main import DescriptionForm, TagForm, CommentForm
+from albumy.notifications import push_comment_notification, push_collect_notification
 
 
 main_bp = Blueprint('main', __name__)
@@ -184,9 +187,15 @@ def new_comment(photo_id):
         replied_id = request.args.get('reply')
         if replied_id:
             comment.replied = Comment.query.get_or_404(replied_id)
+            # 给评论作者发送通知消息
+            push_comment_notification(photo_id=photo.id, receiver=comment.replied.author)
         db.session.add(comment)
         db.session.commit()
         flash('Comment phblished.', 'success')
+
+        if current_user != photo.author:
+            # 给照片作者发送评论通知
+            push_comment_notification(photo_id=photo_id, receiver=photo.author, page=page)
     
     flash_errors(form)
     return redirect(url_for('.show_photo', photo_id=photo_id, page=page))
@@ -297,6 +306,8 @@ def collect(photo_id):
 
     current_user.collect(photo)
     flash('Photo collected.', 'success')
+    if current_user != photo.author:
+        push_collect_notification(collector=current_user, photo_id=photo_id, receiver=photo.author)
     return redirect(url_for('.show_photo', photo_id=photo_id))
 
 
@@ -320,3 +331,40 @@ def show_collectors(photo_id):
     pagination = Collect.query.with_parent(photo).order_by(Collect.timestamp.asc()).paginate(page, per_page, error_out=False)
     collects = pagination.items
     return render_template('main/collectors.html', collects=collects, pagination=pagination, photo=photo)
+
+# 展示通知消息
+@main_bp.route('/notifications')
+def show_notifications():
+    page = request.args.get('page', 1, type=int)
+    per_page = current_app.config['ALBUMY_NOTIFICATION_PER_PAGE']
+    notifications = Notification.query.with_parent(current_user)
+    filter_rule = request.args.get('filter')
+    if filter_rule == 'unread':
+        notifications = notifications.filter_by(is_read=False)
+
+    pagination = notifications.order_by(Notification.timestamp.desc()).paginate(page, per_page, error_out=False)
+    notifications = pagination.items
+
+    return render_template('main/notifications.html', pagination=pagination)
+
+
+# 阅读某条通知消息
+@main_bp.route('/notification/read/<int:notification_id>', methods=['POST'])
+def read_notification(notification_id):
+    notification = Notification.query.get_or_404(notification_id)
+    if current_user != notification_id.receiver:
+        abort(403)
+    notification.is_read = True
+    db.session.commit()
+    flash('Notification archived.', 'success')
+    return redirect(url_for('.show_notifications'))
+
+
+# 阅读所有通知消息
+@main_bp.route('/notifications/read/all', methods=['POST'])
+def read_all_notifications():
+    for notification in current_user.notifications:
+        notification.is_read = True
+    db.session.commit()
+    flash('All notifications archived.', 'success')
+    return redirect(url_for('.show_notifications'))
