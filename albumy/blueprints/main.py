@@ -362,7 +362,7 @@ def read_notification(notification_id):
 
 # 阅读所有通知消息
 @main_bp.route('/notifications/read/all', methods=['POST'])
-def read_all_notifications():
+def read_all_notification():
     for notification in current_user.notifications:
         notification.is_read = True
     db.session.commit()

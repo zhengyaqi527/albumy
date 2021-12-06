@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% from 'bootstrap/pagination.html' import render_pagination %}
-{% from 'macros.html' import photo_card }
+{% from 'macros.html' import photo_card %}
 
 {% block title %}{{ user.name }}'s collection{% endblock %}
 
@@ -13,7 +13,7 @@
                     {{ photo_card(collect.collected) }}
                 {% endfor %}
             {% else %}
-                <div class="tip">{%%}
+                <div class="tip">
                     <h3>No Collection.</h3>
                 </div>
             {% endif %}

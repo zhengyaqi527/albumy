@@ -1,10 +1,11 @@
-{% entends 'base.html' %}
+{% extends 'base.html' %}
 {% from 'bootstrap/pagination.html' import render_pagination %}
 {% from 'macros.html' import user_card with context %}
 
 {% block title %}{{ user.name }}{% endblock %}
 
 {% block content %}
+    {% include 'user/_header.html' %}
     <div class="row">
         <div class="row-col-12">
             <!--判断follows的数量是否为1，为1的话说明关注者为用户本身，不需要显示关注用户列表-->

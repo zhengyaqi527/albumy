@@ -27,7 +27,7 @@ def show_collections(username):
     user = User.query.filter_by(username=username).first_or_404()
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config['ALBUMY_PHOTO_PER_PAGE']
-    pagination = Collect.query.with_parent(user).order_by(Collect.timestamp.desc).pagination(page, per_page, error_out=False)
+    pagination = Collect.query.with_parent(user).order_by(Collect.timestamp.desc()).paginate(page, per_page, error_out=False)
     collects = pagination.items
     return render_template('user/collections.html', user=user, pagination=pagination, collects=collects)
 

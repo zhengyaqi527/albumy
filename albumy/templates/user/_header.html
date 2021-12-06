@@ -34,14 +34,14 @@
         <!--显示用户上传的照片-->
         {{ render_nav_item('user.index', 'Photo', user.photos | length, username=user.username) }}
         <!--展示用户收藏的照片-->
-        {{ render_nav_item('user.show_collections', 'Collections', user.collections | length, username=username) }}
+        {{ render_nav_item('user.show_collections', 'Collections', user.collections | length, username=user.username) }}
         <!--
             查看用户的关注者和正在关注信息，导航栏中显示数量标记。
             因为调用following和followers关系属性会返回查询对象，而不是记录列表，所以不能通过length过滤器获取数量，
             而是附加一个count()查询方法调用。
             同时，因为用户关注了自己，但用户却并不需要显示在列表中，所以用户的关注者/被关注者数量会比实际数量多1，所以需要将总数减去1
         -->
-        {{ render_nav_item('user.show_following', 'Following', user.following.count() - 1, username=username) }}
-        {{ render_nav_item('user.show_followers', 'Follower', user.followers.count() - 1, username=username) }}
+        {{ render_nav_item('user.show_following', 'Following', user.following.count() - 1, username=user.username) }}
+        {{ render_nav_item('user.show_followers', 'Follower', user.followers.count() - 1, username=user.username) }}
     </ul>
 </div>

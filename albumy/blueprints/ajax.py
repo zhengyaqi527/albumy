@@ -1,17 +1,19 @@
 from flask import Blueprint, render_template, jsonify
 from  flask_login import current_user
 
-from albumy.models import User
+from albumy.models import Notification, User
 
 ajax_bp = Blueprint('ajax', __name__)
 
 
+# 获取用户资料
 @ajax_bp.route('/profile/<int:user_id>')
 def get_profile(user_id):
     user = User.query.get_or_404(user_id)
     return render_template('main/profile_popup.html', user=user)
 
 
+# 关注者数量
 @ajax_bp.route('/followers-count/<int:user_id>')
 def followers_count(user_id):
     user = User.query.get_or_404(user_id)
@@ -19,6 +21,7 @@ def followers_count(user_id):
     return jsonify(count=count)
 
 
+# 关注、取消关注
 @ajax_bp.route('/follow/<username>', methods=['POST'])
 def follow(username):
     if not current_user.is_authenticated():
@@ -49,3 +52,13 @@ def unfollow(username):
     
     current_user.unfollow(user)
     return jsonify(message='Follow canceled.')
+
+
+# 获取通知数量
+@ajax_bp.route('/notifications-count')
+def notifications_count():
+    if not current_user.is_authenticated:
+        return jsonify(message='Login required'), 403
+    
+    count = Notification.query.with_parent(current_user).filter_by(is_read=False).count()
+    return jsonify(count=count)

@@ -236,7 +236,7 @@ class Notification(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
 
     receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    receiver = db.relationship('User', back_populates='nofitications')
+    receiver = db.relationship('User', back_populates='notifications')
 
 
 
