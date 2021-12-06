@@ -40,6 +40,7 @@ $(function () {
 
     var flash = null;
 
+
     // 弹窗
     function toast(body, category) {
         clearTimeout(flash);
@@ -98,6 +99,25 @@ $(function () {
             }, 200);
         }
     }
+
+
+    // 更新通知数量
+    function update_notifications_count() {
+        var $el = $('#notification-badge')
+        $.ajax({
+            type: 'GET',
+            url: $el.data('href'),
+            success: function (data) {
+                if (data.count == 0) {
+                    $('#notification-badge').hide()
+                } else {
+                    $el.show();
+                    $el.text(data.count)
+                }
+            }
+        });
+    }
+
 
     // 更新关注者数量
     function update_followers_count(id) {
@@ -174,6 +194,11 @@ $(function () {
     $('#confirm-delete').on('show.bs.modal', function (e) {
         $('.delete-form').attr('action', $(e.relatedTarget).data('href'));
     });
+
+    // 当前用户已登录，每隔30s就更新一次通知数
+    if (is_authenticated) {
+        setInterval(update_notifications_count, 30000);
+    }
 
     // 显示日期
     $("[data-toggle='tooltip']").tooltip({title: moment($(this).data('timestamp')).format('lll')})
