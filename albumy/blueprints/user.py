@@ -128,7 +128,7 @@ def upload_avatar():
     form = UploadAvatarForm()
     if form.validate_on_submit():
         image = form.image.data
-        filename = avatars.sava_avatars(image)
+        filename = avatars.save_avatar(image)
         current_user.avatar_raw = filename
         db.session.commit()
         flash('Image uploaded, please crop.', 'success')
@@ -167,7 +167,7 @@ def change_password():
         db.session.commit()
         flash('Password updated.', 'success')
         return redirect(url_for('.index', username=current_user.username))
-    return render_template('user/settings/change_password.html')
+    return render_template('user/settings/change_password.html', form=form)
 
 
 # 生成token并发送修改邮箱邮件

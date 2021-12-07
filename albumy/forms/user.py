@@ -24,7 +24,7 @@ class EditPrifileForm(FlaskForm):
 class UploadAvatarForm(FlaskForm):
     image = FileField('Upload', validators=[
         FileRequired(),
-        FileAllowed(['jpg', 'png'], 'The file format should be .jpg or .png.')
+        FileAllowed(['jpg', 'jpeg', 'png'], 'The file format should be .jpg or .png.')
     ])
     submit = SubmitField()
 

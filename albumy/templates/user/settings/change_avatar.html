@@ -26,8 +26,8 @@
                 Flask-Avatars提供了avatars.crop_box()和avatars.preview_box()方法，分别渲染裁剪窗口
                 和可选的预览窗口。这两个方法必须传入两个参数，分别是获取头像的视图端点和头像原图的文件名。
             -->
-            {{ avatar.crop_box('main.get_avatar', current_user.avatar_raw) }}
-            {{ avatar.preview_box('main.get_avatar', current_user.avatar_raw) }}
+            {{ avatars.crop_box('main.get_avatar', current_user.avatar_raw) }}
+            {{ avatars.preview_box('main.get_avatar', current_user.avatar_raw) }}
         </div>
         <div class="card-body">
             {{ render_form(crop_form, action=url_for('.crop_avatar')) }}
