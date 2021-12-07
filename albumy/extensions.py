@@ -27,8 +27,13 @@ def load_user(user_id):
     return user
 
 
+# 设置登录视图的端点及信息分类
 login_manager.login_view = 'auth.login'
 login_manager.login_message_category = 'warning'
+
+# 设置重新认证视图的端点及信息分类
+login_manager.refresh_view = 'auth.re_authenticate'
+login_manager.needs_refresh_message_category = 'warning'
 
 
 class Guest(AnonymousUserMixin):

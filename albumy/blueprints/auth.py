@@ -1,5 +1,6 @@
 from flask import Blueprint, redirect, url_for, render_template, flash
 from flask_login import current_user, login_required, login_user, logout_user
+from flask_login.utils import confirm_login, login_fresh
 
 from albumy.extensions import db
 from albumy.models import User
@@ -126,3 +127,15 @@ def reset_password(token):
             return redirect(url_for('.forget_password'))
     
     return render_template('auth/reset_password.html', form=form)
+
+
+@auth_bp.route('re-authenticate', methods=['GET', 'POST'])
+@login_required
+def re_authenticate():
+    if login_fresh():
+        return redirect(url_for('main.index'))
+    form = LoginForm()
+    if form.validate_on_submit() and current_user.validate_password(form.password.data):
+        confirm_login()
+        return redirect_back()
+    return render_template('auth/login.html', form=form)
