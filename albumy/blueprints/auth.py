@@ -17,7 +17,6 @@ auth_bp = Blueprint('auth', __name__)
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
-
     form = RegisterForm()
     if form.validate_on_submit():
         name = form.name.data
@@ -32,6 +31,8 @@ def register():
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
+        token = generate_token(user=user, operation=Operations.CONFIRM)
+        send_confirm_email(user=user, token=token)
         flash('Confirm email sent, check your inbox.', 'info')
         return redirect(url_for('.login'))
 

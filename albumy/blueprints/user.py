@@ -97,7 +97,7 @@ def edit_profile():
         current_user.name = form.name.data
         current_user.username = form.username.data
         current_user.bio = form.bio.data
-        current_user.website = form.bio.data
+        current_user.website = form.website.data
         current_user.location = form.location.data
         db.session.commit()
         flash('Profile updated.', 'success')
@@ -162,7 +162,10 @@ def crop_avatar():
 @fresh_login_required
 def change_password():
     form = ChangePasswordForm()
-    if form.validate_on_submit() and current_user.validate_password(form.old_password.data):
+    if form.validate_on_submit():
+        if not current_user.validate_password(form.old_password.data):
+            flash('Old password is wrong.', 'warning')
+            return render_template('user/settings/change_password.html', form=form)
         current_user.set_password(form.password.data)
         db.session.commit()
         flash('Password updated.', 'success')
