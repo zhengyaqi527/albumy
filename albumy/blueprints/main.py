@@ -7,11 +7,11 @@ from flask_dropzone import random_filename
 from flask_login import login_required, current_user
 from sqlalchemy.engine import url
 from werkzeug.utils import redirect
-from albumy import notifications
+from sqlalchemy.sql.expression import func
 
 from albumy.extensions import db
 from albumy.decorators import permission_requeired, confirm_required
-from albumy.models import Photo, Tag, Comment, Collect, Notification
+from albumy.models import Follow, Photo, Tag, Comment, Collect, Notification
 from albumy.utils import flash_errors, resize_image
 from albumy.forms.main import DescriptionForm, TagForm, CommentForm
 from albumy.notifications import push_comment_notification, push_collect_notification
@@ -22,7 +22,20 @@ main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
 def index():
-    return render_template('main/index.html')
+    if current_user.is_authenticated:
+        page = request.args.get('page', 1, type=int)
+        per_page = current_app.config['ALBUMY_PHOTO_PER_PAGE']
+        pagination = Photo.query \
+                        .join(Follow, Follow.followed_id == Photo.author_id) \
+                        .filter(Follow.follower_id == current_user.id) \
+                        .order_by(Photo.timestamp.desc()) \
+                        .paginate(page, per_page, error_out=False)
+        photos = pagination.items                        
+    else:
+        pagination = None
+        photos = None
+    tags = Tag.query.join(Tag.photos).group_by(Tag.id).order_by(func.count(Photo.id).desc()).limit(10)
+    return render_template('main/index.html', pagination=pagination, photos=photos, tags=tags, Collect=Collect)
 
 
 @main_bp.route('/explore')
@@ -346,14 +359,14 @@ def show_notifications():
     pagination = notifications.order_by(Notification.timestamp.desc()).paginate(page, per_page, error_out=False)
     notifications = pagination.items
 
-    return render_template('main/notifications.html', pagination=pagination)
+    return render_template('main/notifications.html', pagination=pagination, notifications=notifications)
 
 
 # 阅读某条通知消息
 @main_bp.route('/notification/read/<int:notification_id>', methods=['POST'])
 def read_notification(notification_id):
     notification = Notification.query.get_or_404(notification_id)
-    if current_user != notification_id.receiver:
+    if current_user != notification.receiver:
         abort(403)
     notification.is_read = True
     db.session.commit()

@@ -205,13 +205,13 @@ def notification_setting():
     if form.validate_on_submit():
         current_user.receive_comment_notification = form.receive_comment_notification.data
         current_user.receive_follow_notification = form.receive_follow_notification.data
-        current_user.receive_collect_notifcation = form.receive_collect_notification.data
+        current_user.receive_collect_notification = form.receive_collect_notification.data
         db.session.commit()
         flash('Notification settings updated.', 'success')
         return redirect(url_for('.index', username=current_user.username))
     form.receive_comment_notification.data = current_user.receive_comment_notification
+    form.receive_follow_notification.data = current_user.receive_follow_notification 
     form.receive_collect_notification.data = current_user.receive_collect_notification
-    form.receive_follow_notification.data = current_user.receive_follow_notification        
     return render_template('user/settings/edit_notification.html', form=form)
 
 
@@ -221,10 +221,14 @@ def privacy_setting():
     form = PrivacyForm()
     if form.validate_on_submit():
         current_user.public_collections = form.public_collections.data
+        current_user.public_following = form.public_following.data
+        current_user.public_followers = form.public_followers.data
         db.session.commit()
         flash('Privacy settings updated.', 'success')
         return redirect(url_for('.index', username=current_user.username))
-    form.public_collections.data = current_user.public_collections        
+    form.public_collections.data = current_user.public_collections
+    form.public_following.data = current_user.public_following
+    form.public_followers.data = current_user.public_followers        
     return render_template('user/settings/edit_privacy.html', form=form)
 
 

@@ -1,7 +1,9 @@
-from flask import Blueprint, render_template, jsonify
+from flask import Blueprint, json, render_template, jsonify
+from flask.signals import message_flashed
 from  flask_login import current_user
 
-from albumy.models import Notification, User
+from albumy.models import Notification, Photo, User
+from albumy.notifications import push_collect_notification
 
 ajax_bp = Blueprint('ajax', __name__)
 
@@ -62,3 +64,41 @@ def notifications_count():
     
     count = Notification.query.with_parent(current_user).filter_by(is_read=False).count()
     return jsonify(count=count)
+
+
+@ajax_bp.route('/<int:photo_id>/collectors-count')
+def collectors_count(photo_id):
+    photo = Photo.query.get_or_404(photo_id)
+    count = len(photo.collectors)
+    return jsonify(count=count)
+
+
+@ajax_bp.route('/collect/<int:photo_id>', methods=['POST'])
+def collect(photo_id):
+    if not current_user.is_authenticated:
+        return jsonify(message='Login required.'), 403
+    if not current_user.confirmed:
+        return jsonify(message='Confirm required'), 400
+    if not current_user.can('COLLECT'):
+        return jsonify(message='No permission.'), 403
+            
+    photo = Photo.query.get_or_404(photo_id)    
+    if current_user.is_collection(photo):
+        return jsonify(message='Already collected.'), 400
+    
+    current_user.collect(photo)
+    if current_user != photo.author and photo.author.receive_collect_notification:
+        push_collect_notification(collector=current_user, photo_id=photo.id, receiver=photo.author)
+    return jsonify(message='Photo collected.')
+
+
+@ajax_bp.route('/uncollect/<int:photo_id>', methods=['POST'])
+def uncollect(photo_id):
+    if not current_user.is_authenticated:
+        return jsonify(message='Login required.'), 403
+    photo = Photo.query.get_or_404(photo_id)
+    if not current_user.is_collecting(photo):
+        return jsonify(message='Not collect yet.'), 400
+        
+    current_user.uncollect(photo)
+    return jsonify(message='Collect canceled.')

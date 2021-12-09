@@ -164,6 +164,50 @@ $(function () {
         });
     }
 
+    // 更新照片收藏数
+    function update_collectors_count(id) {
+        $.ajax({
+            type: 'GET',
+            url: $('#collectors-count-' + id).data('href'),
+            success: function (data) {
+                console.log(data);
+                $('#collectors-count-' + id).text(data.count);
+            }
+        });
+    }
+
+
+    // 收藏与取消收藏
+    function collect(e) {
+        var $el = $(e.target);
+        var id = $el.data('id');
+
+        $.ajax({
+            type: 'POST',
+            url: $el.data('href'),
+            success: function (data) {
+                $el.prev().show();
+                $el.hide();
+                update_collectors_count(id);
+                toast(data.message);
+            }
+        });
+    }
+
+    function uncollect(e) {
+        var $el = $(e.target);
+        var id = $el.data('id');
+        $.ajax({
+            type: 'POST',
+            url: $el.data('href'),
+            success: function (data) {
+                $el.next().show();
+                $el.hide();
+                update_collectors_count(id);
+                toast(data.message);
+            }
+        });
+    }
 
 
     $('.profile-popover').hover(show_profile_popover.bind(this), hide_profile_popover.bind(this));
@@ -197,7 +241,7 @@ $(function () {
 
     // 当前用户已登录，每隔30s就更新一次通知数
     if (is_authenticated) {
-        setInterval(update_notifications_count, 30000);
+        setInterval(update_notifications_count, 3000000);
     }
 
     // 显示日期

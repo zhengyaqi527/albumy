@@ -7,23 +7,29 @@
 {% block content %}
     {% include 'user/_header.html' %}
     <div class="row">
-        <div class="row-col-12">
-            <!--判断follows的数量是否为1，为1的话说明关注者为用户本身，不需要显示关注用户列表-->
-            {% if follows | length != 1 %}
-                {% for follow in follows %}
-                    <!--判断关注者是不是用户本身，不是的话渲染关注者用户卡片-->
-                    {% if follow.follower != user %}
-                        {{ user_card(user=follow.follower) }}
-                    {% endif %}
-                {% endfor %}
+        <div class="col-md-12">
+            {% if user.public_follower or current_user == user %}
+                <!--判断follows的数量是否为1，为1的话说明关注者为用户本身，不需要显示关注用户列表-->
+                {% if follows | length != 1 %}
+                    {% for follow in follows %}
+                        <!--判断关注者是不是用户本身，不是的话渲染关注者用户卡片-->
+                        {% if follow.follower != user %}
+                            {{ user_card(user=follow.follower) }}
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <div class="tip">
+                        <h3>No followers.</h3>
+                    </div>
+                {% endif %}            
             {% else %}
                 <div class="tip">
-                    <h3>No followers.</h3>
+                    <h3>This user's followers are private.</h3>
                 </div>
             {% endif %}
         </div>
     </div>
-    {% if follows | length != 1 %}
+    {% if follows and follows|length != 1 %}
         <div class="page-footer">
             {{ render_pagination(pagination) }}
         </div>

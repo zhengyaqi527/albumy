@@ -1,3 +1,5 @@
+{% from 'macros.html' import follow_area with context %}
+
 <!-- 上一张、下一张 -->
 <nav aria-label="Page navigation">
     <ul class="pagination">
@@ -26,6 +28,7 @@
                 <p class="card-subtitle mb-2 text-muted">
                     {{ photo.author.username }}
                 </p>
+                {{ follow_area(photo.author) }}
             </div>
         </div>
     </div>

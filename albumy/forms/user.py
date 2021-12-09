@@ -51,13 +51,15 @@ class ChangePasswordForm(FlaskForm):
 
 class NotificationSettingForm(FlaskForm):
     receive_comment_notification = BooleanField('New Comment')
-    receive_follow_notification = BooleanField('New follower')
-    receive_collect_notification = BooleanField('New collector')
+    receive_follow_notification = BooleanField('New Follower')
+    receive_collect_notification = BooleanField('New Collector')
     submit = SubmitField()
 
 
 class PrivacyForm(FlaskForm):
     public_collections = BooleanField('Public my collection')
+    public_followers = BooleanField('Public my followers')
+    public_following = BooleanField('Public my following')
     submit = SubmitField()
 
 

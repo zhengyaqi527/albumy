@@ -88,6 +88,8 @@ class User(db.Model, UserMixin):
     receive_follow_notification = db.Column(db.Boolean, default=True)
     receive_collect_notification = db.Column(db.Boolean, default=True)
     public_collections = db.Column(db.Boolean, default=True)
+    public_followers = db.Column(db.Boolean, default=True)
+    public_following = db.Column(db.Boolean, default=True)
 
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
 
