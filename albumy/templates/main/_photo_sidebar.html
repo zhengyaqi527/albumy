@@ -52,7 +52,7 @@
                 {% endif %}
             </p>
         </div>
-        {% if current_user == photo.author %}
+        {% if current_user == photo.author or current_user.can('MODERATE') %}
             <!--描述表单-->
             <div id="description-form">
                 <form action="{{ url_for('.edit_description', photo_id=photo.id) }}" method="post">
@@ -76,7 +76,7 @@
                     {% endfor %}
                 {% endif %}
                 <!--标签编辑-->
-                {% if current_user == photo.author %}
+                {% if current_user == photo.author  or current_user.can('MODERATE') %}
                         <a id="tag-btn" href="#!">
                             <small>
                                 <span class="oi oi-pencil"></span>
@@ -86,7 +86,7 @@
                 {% endif %}
             </p>
         </div>
-        {% if current_user == photo.author %}
+        {% if current_user == photo.author  or current_user.can('MODERATE') %}
             <!--标签表单-->
             <div id="tag-form">
                 <form action="{{ url_for('.new_tag', photo_id=photo.id) }}" method="post">

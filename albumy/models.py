@@ -80,6 +80,8 @@ class User(db.Model, UserMixin):
     location = db.Column(db.String(50))
     member_since = db.Column(db.DateTime, default=datetime.utcnow)
     confirmed = db.Column(db.Boolean, default=False)
+    locked = db.Column(db.Boolean, default=False) # 锁定状态
+    active = db.Column(db.Boolean, default=True) # 封禁状态
     avatar_s = db.Column(db.String(64))
     avatar_m = db.Column(db.String(64))
     avatar_l = db.Column(db.String(64))
@@ -92,7 +94,7 @@ class User(db.Model, UserMixin):
     public_following = db.Column(db.Boolean, default=True)
 
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
-
+    
     role = db.relationship('Role', back_populates='users')
     photos = db.relationship('Photo', back_populates='author', cascade='all')
     comments = db.relationship('Comment', back_populates='author', cascade='all')
@@ -112,13 +114,18 @@ class User(db.Model, UserMixin):
     @property
     def is_admin(self):
         return self.role.name == 'Administrator'
+    
+    # 重写继承自Flask-Login的UserMixin类中的is_active属性，如果user对象的is_active属性值为False，Flask-Login将拒绝用户登录
+    @property
+    def is_active(self):
+        return self.active
 
     # 用户是否有某种权限
     def can(self, permission_name):
         permission = Permission.query.filter_by(name=permission_name).first()
         return  permission is not None and self.role is not None and permission in self.role.permissions
 
-    # 为用户设置权限
+    # 为用户设置角色
     def set_role(self):
         if self.role is None:
             if self.email == current_app.config['ALBUMY_ADMIN_EMAIL']:
@@ -126,7 +133,28 @@ class User(db.Model, UserMixin):
             else:
                 self.role = Role.query.filter_by(name='User').first()
             db.session.commit()
+
+    # 锁定、解锁用户账户
+    def lock(self):
+        self.locked = True
+        self.role = Role.query.filter_by(name='Locked').first()
+        db.session.commit()
     
+    def unlock(self):
+        self.locked = False
+        self.role = Role.query.filter_by(name='User').first()
+        db.session.commit()
+
+    # 封禁、解封用户账户
+    def block(self):
+        self.active = False
+        db.session.commit()
+
+    def unblock(self):
+        self.active = True
+        db.session.commit()
+
+
     # 设置密码、校验密码
     def set_password(self, password):
         self.pasword_hash = generate_password_hash(password)

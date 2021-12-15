@@ -1,25 +1,31 @@
+{% from 'macros.html' import follow_area with context %}
 {% from 'bootstrap/nav.html' import render_nav_item %}
 
 <div class="row">
+    <!--头像-->
     <div class="col-md-3">
         <a href="{% if current_user == user %}{{ url_for('.change_avatar') }}{% else %}#{% endif %}" title="Change avatar">
             <img class="img-fluid rounded" src="{{ url_for('main.get_avatar', filename=user.avatar_l) }}">
         </a>
     </div>
     <div class="col-md-9">
+        <!--昵称、用户名-->
         <h1>
             {{ user.name }}
             <small class="text-muted">{{ user.username }}</small>
         </h1>
+        <!--用户简介-->
         {% if user.bio %}
             <p>{{ user.bio }}</p>
         {% endif %}
+        <!--用户网站-->
         <p>
             {% if user.website %}
                 <span class="oi oi-link-intact"></span>
                 <a href="{{ user.website }}" target="_blink">{{ user.website | truncate(30) }}</a>
             {% endif %}
         </p>
+        <!--用户地址-->
         <p>            
             {% if user.location %}
                 <span class="oi oi-link-intact"></span>
@@ -29,10 +35,57 @@
                 &nbsp;&nbsp;
             {% endif %}
         </p>
+        <!--用户注册时间-->
         <p>
             <span class="oi oi-calendar"></span>
             Joined {{ moment(user.member_since).format('LLL') }}
         </p>
+        <div>
+            {% if current_user!= user %}
+                {% if current_user.can('MODERATE') %}
+                    <!--锁定、解除锁定用户-->
+                    {% if user.locked %}
+                        <form class="inline" action="{{ url_for('admin.unlock_user', user_id=user.id) }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="submit" class="btn btn-secondary btn-sm" value="Unlock">
+                        </form>
+                    {% else %}
+                        <form class="inline" action="{{ url_for('admin.lock_user', user_id=user.id) }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="submit" class="btn btn-warning btn-sm" value="Lock">
+                        </form>
+                    {% endif %}
+                    <!--封禁、解除封禁用户-->
+                    {% if user.active %}
+                        <form class="inline" action="{{ url_for('admin.block_user', user_id=user.id) }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="submit" class="btn btn-warning btn-sm" value="Block">
+                        </form>
+                    {% else %}
+                        <form class="inline" action="{{ url_for('admin.unblock_user', user_id=user.id) }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="submit" class="btn btn-secondary btn-sm" value="Unblock">
+                        </form>
+                    {% endif %}
+                    <a class="btn btn-light btn-sm" href="mailto:{{ user.email }}">Email</a>
+                {% endif %}
+                <!--管理员更新用户资料入口-->
+                {% if current_user.is_admin %}
+                    <a class="btn btn-warning btn-sm" href="{{ url_for('admin.edit_profile_admin', user_id=user.id) }}">
+                        Edit Profile
+                    </a>
+                {% endif %}                
+            {% endif %}
+            <!--编辑资料-->
+            <div class="float-right">
+                {{ follow_area(user) }}
+                {% if current_user.is_authenticated and user == current_user %}
+                    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('.edit_profile') }}">
+                        Edit Profile
+                    </a>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
 <div class="user-nav">

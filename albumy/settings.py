@@ -47,21 +47,19 @@ class BaseConfig:
     AVATARS_SAVE_PATH = os.path.join(ALBUMY_UPLOAD_PATH, 'avatars')
     AVATARS_SIZE_TUPLE = (30, 100, 200)
 
-    # 图片展示
+    # 前台数据显示
     ALBUMY_PHOTO_PER_PAGE = 12
-
-    # 用户展示
     ALBUMY_USER_PER_PAGE = 12
-
-    # 评论展示
     ALBUMY_COMMENT_PER_PAGE = 12
-
-    # 用户展示
     ALBUMY_USER_PER_PAGE = 12
-
-    # 通知消息展示
     ALBUMY_NOTIFICATION_PER_PAGE = 12
     
+    # 管理后台列表展示
+    ALBUMY_MANAGE_USER_PER_PAGE = 20
+    ALBUMY_MANAGE_PHOTO_PER_PAGE = 20
+    ALBUMY_MANAGE_TAG_PER_PAGE = 20
+    ALBUMY_MANAGE_COMMENT_PER_PAGE = 20
+
 
 class DevelopmentConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')

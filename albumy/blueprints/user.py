@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, flash, redirect, url_for, request, current_app
 from flask_login import login_required, fresh_login_required, current_user
+from flask_login.utils import logout_user
 from albumy.emails import send_confirm_email
 
 from albumy.models import Photo, User, Collect
@@ -18,6 +19,11 @@ user_bp = Blueprint('user', __name__)
 @user_bp.route('/<username>')
 def index(username):
     user = User.query.filter_by(username=username).first_or_404()
+    if user == current_user and user.locked:
+        flash('Your account is locked.', 'dangers')
+    # 当前用户被封禁，则自动登出用户
+    if user == current_user and not user.active:
+        logout_user(user)
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config['ALBUMY_PHOTO_PER_PAGE']
     pagination = Photo.query.with_parent(user).order_by(Photo.timestamp.desc()).paginate(page, per_page, error_out=False)
