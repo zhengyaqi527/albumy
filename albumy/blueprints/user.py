@@ -23,7 +23,7 @@ def index(username):
         flash('Your account is locked.', 'dangers')
     # 当前用户被封禁，则自动登出用户
     if user == current_user and not user.active:
-        logout_user(user)
+        logout_user()
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config['ALBUMY_PHOTO_PER_PAGE']
     pagination = Photo.query.with_parent(user).order_by(Photo.timestamp.desc()).paginate(page, per_page, error_out=False)

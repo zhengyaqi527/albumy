@@ -100,7 +100,7 @@ def forget_password():
     form = ForgetPasswordForm()
     if form.validate_on_submit():
         email = form.email.data.lower()
-        user = User.query.filter(email=email).first()
+        user = User.query.filter_by(email=email).first()
         if user:
             token = generate_token(user=user, operation=Operations.RESET_PASSWORD)
             send_reset_password_email(user=user, token=token)
@@ -112,13 +112,14 @@ def forget_password():
 
 
 @auth_bp.route('/reset-password/<token>', methods=['GET', 'POST'])
-@login_required
 def reset_password(token):
+    print('进入reset_password....')
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
 
     form = ResetPasswordForm()
     if form.validate_on_submit():
+        print('进入验证validate_on_submit....')
         user = User.query.filter_by(email=form.email.data.lower()).first()
         if not user:
             flash('Invalid email', 'warning')
@@ -130,7 +131,7 @@ def reset_password(token):
         else:
             flash('Invalid or expired token.', 'danger')
             return redirect(url_for('.forget_password'))
-    
+    print('返回resetpasswordform')
     return render_template('auth/reset_password.html', form=form)
 
 
